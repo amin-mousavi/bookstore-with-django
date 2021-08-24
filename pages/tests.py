@@ -16,7 +16,7 @@ class HomePageViewTest(SimpleTestCase):
         self.assertTemplateUsed(self.resp, 'pages/home.html')
 
     def test_home_page_contain_correct(self):
-        self.assertContains(self.resp, 'HomePage')
+        self.assertContains(self.resp, 'Homepage')
     
     def test_home_page_contain_incorrect(self):
         self.assertNotContains(self.resp, 'Hi there! this is a incorrect content')
