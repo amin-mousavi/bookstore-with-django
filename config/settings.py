@@ -47,6 +47,10 @@ INSTALLED_APPS = [
     'crispy_forms',
     'allauth',
     'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.github',
+
+
 
     'accounts',
     'pages',
@@ -174,3 +178,6 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True 
 
 DEFAULT_FROM_EMAIL = 'admin@djangobookstore.com'
+
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
