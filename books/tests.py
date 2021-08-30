@@ -1,7 +1,10 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
+
 from .models import Book,Review
+
 class BookTests(TestCase):
 
     def setUp(self):
@@ -10,6 +13,8 @@ class BookTests(TestCase):
             email = 'reviewuser@email.com',
             password = 'reviewuser1234',
         )
+
+        self.special_permission = Permission.objects.get(codename='special_status')
 
         self.book = Book.objects.create(
             title = 'test book',
@@ -23,23 +28,51 @@ class BookTests(TestCase):
             review = 'This is a test review'
         )
 
-    def test_string_representation(self):
+    def test_book_listing(self):
         self.assertEqual(f'{self.book.title}', 'test book')
         self.assertEqual(f'{self.book.author}', 'test author')
         self.assertEqual('{:.2f}'.format(self.book.price), '20.00')
     
-    def test_book_list_view(self):
+    # def test_book_list_view(self):
+    #     response = self.client.get(reverse('book_list'))
+    #     self.assertEqual(response.status_code, 302)
+    #     self.assertTemplateUsed(response, 'books/book_list.html')
+    #     self.assertContains(response, 'test book')
+
+    # def test_book_detail_view(self):
+    #     response = self.client.get(self.book.get_absolute_url())
+    #     no_response = self.client.get('/books/123456')
+    #     self.assertEqual(response.status_code, 302)
+    #     self.assertEqual(no_response.status_code, 404)
+    #     self.assertTemplateUsed(response, 'books/book_detail.html')
+    #     self.assertContains(response, 'test book')
+    #     self.assertContains(response, 'This is a test review')
+    #     self.assertNotContains(response, 'Hi there! this text should not be this page')
+
+    def test_book_list_view_for_logged_in_user(self):
+        self.client.login(email='reviewuser@email.com', password='reviewuser1234')
         response = self.client.get(reverse('book_list'))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'books/book_list.html')
         self.assertContains(response, 'test book')
+        self.assertTemplateUsed(response, 'books/book_list.html')
 
-    def test_book_detail_view(self):
+    def test_book_list_view_for_logged_out_user(self):
+        self.client.logout()
+        response = self.client.get(reverse('book_list'))
+        self.assertEqual(response.status_code, 302 )
+        self.assertRedirects(response, '{}?next=/books/'.format(reverse('account_login')))
+        response = self.client.get('{}?next=/books/'.format(reverse('account_login')))
+        self.assertContains(response, 'Log In')
+
+    def test_book_detail_view_with_permissions(self):
+        self.client.login(email='reviewuser@email.com', password='reviewuser1234')
+        self.user.user_permissions.add(self.special_permission)
         response = self.client.get(self.book.get_absolute_url())
-        no_response = self.client.get('/books/123456')
+        no_response = self.client.get('/books/12345/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(no_response.status_code, 404)
-        self.assertTemplateUsed(response, 'books/book_detail.html')
         self.assertContains(response, 'test book')
         self.assertContains(response, 'This is a test review')
-        self.assertNotContains(response, 'Hi there! this text should not be this page')
+        self.assertTemplateUsed(response, 'books/book_detail.html')
+
+
