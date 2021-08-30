@@ -7,14 +7,10 @@
 
 {% block content %}
   <h1>Homepage</h1>
-  <img class="bookcover" src="{% static 'images/dfp.png' %}">
-  {% if user.is_authenticated %}
-    <p>Hi {{ user.email }}!</p>
-    <p><a href="{% url 'account_logout' %}">Log Out</a></p>
-  {% else %}
-    <p>You are not logged in</p>
-    <p><a href="{% url 'account_login' %}">Log In</a> |
-       <a href="{% url 'account_signup' %}">Sign Up</a></p>
-       <a href="{% provider_login_url 'github' %}">Sign Up with GitHub</a>
-  {% endif %}
-{% endblock content %}
+  <form action="{% url 'search_result' %}" class="form-inline mt-2 mt-md-0" method="GET">
+    <input name="q" class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search" >
+    
+    <button class="btn btn-primary " type="submit"> search</button>
+  </form>
+
+  {% endblock content %}
